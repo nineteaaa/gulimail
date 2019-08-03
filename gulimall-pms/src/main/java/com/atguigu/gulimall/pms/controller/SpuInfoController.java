@@ -9,6 +9,7 @@ import com.atguigu.gulimall.commons.bean.QueryCondition;
 import com.atguigu.gulimall.commons.bean.Resp;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,19 @@ import com.atguigu.gulimall.pms.service.SpuInfoService;
 public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
+
+
+
+    @ApiOperation("按照spuid,name,分类id检索商品")
+    @GetMapping("/simple/search")
+    public Resp<PageVo> QuerySpuInfoPage(
+            @ApiParam(name = "catID",value = "分类ID",required = true)
+            @RequestParam(value = "catId") Long catId ,
+            QueryCondition queryCondition){
+           PageVo page =  spuInfoService.queryPageByCatId(catId,queryCondition);
+           return Resp.ok(page);
+    }
+
 
     /**
      * 列表

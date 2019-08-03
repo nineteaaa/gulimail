@@ -12,6 +12,7 @@ import com.atguigu.gulimall.commons.bean.QueryCondition;
 import com.atguigu.gulimall.pms.dao.SpuInfoDao;
 import com.atguigu.gulimall.pms.entity.SpuInfoEntity;
 import com.atguigu.gulimall.pms.service.SpuInfoService;
+import org.springframework.util.StringUtils;
 
 
 @Service("spuInfoService")
@@ -25,6 +26,31 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         );
 
         return new PageVo(page);
+    }
+
+    @Override
+    public PageVo queryPageByCatId(Long catId, QueryCondition queryCondition) {
+        //查所有
+        QueryWrapper<SpuInfoEntity> wrapper = new QueryWrapper<>();
+        if (catId!=0) {
+            wrapper.eq("catalog_id",catId);
+            if(!StringUtils.isEmpty(queryCondition.getKey())){
+                wrapper.and(obj->{
+                   obj.like("spu_name",queryCondition.getKey());
+                   obj.or().like("id",queryCondition.getKey());
+                   return obj;
+                });
+            }
+        }
+
+        //封装翻页条件
+        IPage<SpuInfoEntity> page = new Query<SpuInfoEntity>().getPage(queryCondition);
+        //取数据库查询
+        IPage<SpuInfoEntity> data = this.page(page, wrapper);
+
+        PageVo vo = new PageVo(data);
+
+        return vo;
     }
 
 }
