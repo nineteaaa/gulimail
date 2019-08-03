@@ -6,8 +6,9 @@
  * 版权所有，侵权必究！
  */
 
-package com.atguigu.gulimall.sms.config;
+package com.atguigu.gulimall.ums.config;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,37 +26,28 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-@Configuration
 @EnableSwagger2
-public class SwaggerConfig implements WebMvcConfigurer {
+@Configuration
+public class UmsSwaggerConfig {
 
-    @Bean
-    public Docket createRestApi() {
+    @Bean("用户平台")
+    public Docket userApis() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .apiInfo(apiInfo())
-            .select()
-            //加了ApiOperation注解的类，才生成接口文档
-            .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-            //包下的类，才生成接口文档
-            //.apis(RequestHandlerSelectors.basePackage("io.guli.controller"))
-            .paths(PathSelectors.any())
-            .build()
-            .securitySchemes(security());
+                .groupName("用户平台")
+                .select()
+                .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
+                .paths(PathSelectors.regex("/ums.*"))
+                .build()
+                .apiInfo(apiInfo())
+                .enable(true);
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title("促销管理模块")
-            .description("谷粒商城促销管理服务模块文档")
-            .termsOfServiceUrl("https://www.guli.cloud")
-            .version("3.0.0")
-            .build();
+                .title("谷粒商城-用户平台接口文档")
+                .description("提供用户平台的文档")
+                .termsOfServiceUrl("http://www.atguigu.com/")
+                .version("1.0")
+                .build();
     }
-
-    private List<ApiKey> security() {
-        return newArrayList(
-            new ApiKey("token", "token", "header")
-        );
-    }
-
 }

@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@EnableDiscoveryClient
-@EnableSwagger2
 @MapperScan(basePackages = "com.atguigu.gulimall.wms.dao")
 @SpringBootApplication
 public class GulimallWmsApplication {
