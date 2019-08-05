@@ -1,15 +1,20 @@
 package com.atguigu.gulimall.pms.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
 import com.atguigu.gulimall.commons.bean.PageVo;
 import com.atguigu.gulimall.commons.bean.QueryCondition;
 import com.atguigu.gulimall.commons.bean.Resp;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +38,15 @@ public class SkuInfoController {
     @Autowired
     private SkuInfoService skuInfoService;
 
+
+    @ApiOperation("根据商品的spuId获取skuId信息")  //List
+    @GetMapping("/list/spu/{spuId}")
+    public Resp<List<SkuInfoEntity>> spuSkuInfo(
+            @ApiParam(name = "spuId",value = "某个spu的id",required = true)
+            @PathVariable Long spuId ){
+        List<SkuInfoEntity> skuInfoes = skuInfoService.list(new QueryWrapper<SkuInfoEntity>().eq("spu_id", spuId));
+        return Resp.ok(skuInfoes);
+    }
     /**
      * 列表
      */

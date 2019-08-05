@@ -1,22 +1,29 @@
 package com.atguigu.gulimall.pms.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 
 
 import com.atguigu.gulimall.commons.bean.PageVo;
 import com.atguigu.gulimall.commons.bean.QueryCondition;
 import com.atguigu.gulimall.commons.bean.Resp;
+import com.atguigu.gulimall.pms.entity.AttrAttrgroupRelationEntity;
+import com.atguigu.gulimall.pms.entity.AttrEntity;
+import com.atguigu.gulimall.pms.service.AttrAttrgroupRelationService;
+import com.atguigu.gulimall.pms.service.AttrService;
+import com.atguigu.gulimall.pms.vo.AttrGroupWithAttrsVo;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.atguigu.gulimall.pms.entity.AttrGroupEntity;
 import com.atguigu.gulimall.pms.service.AttrGroupService;
-
-
 
 
 /**
@@ -32,7 +39,44 @@ import com.atguigu.gulimall.pms.service.AttrGroupService;
 public class AttrGroupController {
     @Autowired
     private AttrGroupService attrGroupService;
+    @Autowired
+    private AttrAttrgroupRelationService relationService;
+    @Autowired
+    private AttrService attrService;
 
+    @ApiOperation("查询某个分组信息以及它下面的所有属性信息")
+    @GetMapping("/info/withattrs/{attrGroupId}")
+    public Resp<AttrGroupWithAttrsVo> getGroupAttr(@PathVariable(value = "attrGroupId") Long attrGroupId){
+        AttrGroupWithAttrsVo attrsVo = new AttrGroupWithAttrsVo();
+        //获取当前分组信息
+        AttrGroupEntity attrGroupEntity = attrGroupService.getById(attrGroupId);
+        BeanUtils.copyProperties(attrGroupEntity,attrsVo);
+        //查出当前分组和属性的所有关联关系
+        List<AttrAttrgroupRelationEntity> relations = relationService.list(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_group_id", attrGroupId));
+        attrsVo.setRelations(relations);
+        //查出当前分组的所有属性
+        ArrayList<Long> attrIds = new ArrayList<>();
+        relations.forEach(item ->{
+            Long attrId = item.getAttrId();
+            attrIds.add(attrId);
+        });
+        List<AttrEntity> attrs = attrService.list(new QueryWrapper<AttrEntity>().in("attr_id", attrIds));
+        attrsVo.setAttrEntities(attrs);
+        return Resp.ok(attrsVo);
+
+    }
+
+
+
+    @ApiOperation("查询某个三级分类下的所有属性分组")
+    @GetMapping("/list/category/{catId}")
+    public Resp<PageVo> getCategoryAttrGroups(
+            @ApiParam(name = "catId",value = "分类id",required = true)
+            @PathVariable(value = "catId")Long catId,
+            QueryCondition queryCondition){
+       PageVo pageVo = attrGroupService.queryPageAttrGroupsByCatId(queryCondition,catId);
+       return Resp.ok(pageVo);
+    }
     /**
      * 列表
      */
@@ -52,8 +96,8 @@ public class AttrGroupController {
     @ApiOperation("详情查询")
     @GetMapping("/info/{attrGroupId}")
     @PreAuthorize("hasAuthority('pms:attrgroup:info')")
-    public Resp<AttrGroupEntity> info(@PathVariable("attrGroupId") Long attrGroupId){
-		AttrGroupEntity attrGroup = attrGroupService.getById(attrGroupId);
+    public Resp<AttrGroupEntity> info(@PathVariable("attrGroupId") Long attrGroupId) {
+        AttrGroupEntity attrGroup = attrGroupService.getById(attrGroupId);
 
         return Resp.ok(attrGroup);
     }
@@ -64,8 +108,8 @@ public class AttrGroupController {
     @ApiOperation("保存")
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:attrgroup:save')")
-    public Resp<Object> save(@RequestBody AttrGroupEntity attrGroup){
-		attrGroupService.save(attrGroup);
+    public Resp<Object> save(@RequestBody AttrGroupEntity attrGroup) {
+        attrGroupService.save(attrGroup);
 
         return Resp.ok(null);
     }
@@ -76,8 +120,8 @@ public class AttrGroupController {
     @ApiOperation("修改")
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('pms:attrgroup:update')")
-    public Resp<Object> update(@RequestBody AttrGroupEntity attrGroup){
-		attrGroupService.updateById(attrGroup);
+    public Resp<Object> update(@RequestBody AttrGroupEntity attrGroup) {
+        attrGroupService.updateById(attrGroup);
 
         return Resp.ok(null);
     }
@@ -88,8 +132,8 @@ public class AttrGroupController {
     @ApiOperation("删除")
     @PostMapping("/delete")
     @PreAuthorize("hasAuthority('pms:attrgroup:delete')")
-    public Resp<Object> delete(@RequestBody Long[] attrGroupIds){
-		attrGroupService.removeByIds(Arrays.asList(attrGroupIds));
+    public Resp<Object> delete(@RequestBody Long[] attrGroupIds) {
+        attrGroupService.removeByIds(Arrays.asList(attrGroupIds));
 
         return Resp.ok(null);
     }
