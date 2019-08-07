@@ -45,9 +45,9 @@ public class SkuBoundsController {
     @ApiOperation("保存sku的所有营销信息")
     @PostMapping("/saleInfo/save")
     public Resp<Object> saveSkuSaleInfos(@RequestBody List<SkuSaleInfoTo> to){
-        log.info("sms接收到数据...{0}",to);
+        log.info("sms接收到数据...{}",to);
         skuBoundsService.saveSkuAllSaleInfo(to);
-        return Resp.ok("ok");
+        return Resp.ok(null);
     }
 
     /**

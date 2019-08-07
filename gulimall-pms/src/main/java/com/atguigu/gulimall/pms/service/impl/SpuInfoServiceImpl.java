@@ -87,8 +87,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         this.saveSpuImagesInfo(spuInfo.getSpuImages(),spuId);
         //2.保存spu基本属性信息
         this.saveSpuBaseAttr(spuInfo.getBaseAttrsVos(),spuId);
-        BaseAttrVo baseAttrVo = new BaseAttrVo();
-        BeanUtils.copyProperties(spuInfo,baseAttrVo);
         //3.保存sku信息及营销信息
         this.saveSkuInfos(spuId,spuInfo.getSkus());
     }
@@ -105,31 +103,36 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Override
     public void saveSpuImagesInfo(String[] spuImages, Long spuId) {
-        StringBuffer urls = new StringBuffer();
-        for (String image : spuImages) {
-            urls.append(image).append(",");
-        }
-        urls.substring(0,urls.length()-1);
+//        StringBuffer urls = new StringBuffer();
+//        for (String image : spuImages) {
+//            urls.append(image).append(",");
+//        }
+//        urls.substring(0,urls.length()-1);
         SpuInfoDescEntity descEntity = new SpuInfoDescEntity();
         descEntity.setSpuId(spuId);
-        descEntity.setDecript(urls.toString());
+        descEntity.setDecript(AppUtils.arrayToStringWithSeparator(spuImages,","));
         spuInfoDescDao.insert(descEntity);
     }
 
     @Override
     public void saveSpuBaseAttr(List<BaseAttrVo> baseAttrsVos, Long spuId) {
         List<ProductAttrValueEntity> allSave = new ArrayList<>();
-        for (BaseAttrVo baseAttrsVo : baseAttrsVos) {
-            ProductAttrValueEntity entity = new ProductAttrValueEntity();
-            entity.setSpuId(spuId);
-            entity.setAttrId(baseAttrsVo.getAttrId());
-            entity.setAttrName(baseAttrsVo.getAttrName());
-            String[] valueSelected = baseAttrsVo.getValueSelected();
-            entity.setAttrValue(AppUtils.arrayToStringWithSeparator(valueSelected,","));
-            entity.setAttrSort(0);
-            entity.setQuickShow(1);
+       if (baseAttrsVos !=null&&baseAttrsVos.size()>0){
+            for (BaseAttrVo baseAttrsVo : baseAttrsVos) {
+                ProductAttrValueEntity entity = new ProductAttrValueEntity();
+                entity.setSpuId(spuId);
+                entity.setAttrId(baseAttrsVo.getAttrId());
+                entity.setAttrName(baseAttrsVo.getAttrName());
+                String[] valueSelected = baseAttrsVo.getValueSelected();
+                entity.setAttrValue(AppUtils.arrayToStringWithSeparator(valueSelected,","));
+                entity.setAttrSort(0);
+                entity.setQuickShow(1);
+                allSave.add(entity);
+            }
+            productAttrValueDao.insertBatch(allSave);
         }
-        productAttrValueDao.insertBatch(allSave);
+
+
 
     }
 
@@ -176,16 +179,19 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             //保存销售属性组合
 
             List<SaleAttrVo> saleAttrs = skuVo.getSaleAttrVos();
-            for (SaleAttrVo saleAttr : saleAttrs) {
-                SkuSaleAttrValueEntity entity = new SkuSaleAttrValueEntity();
-                entity.setAttrId(saleAttr.getAttrId());
-                entity.setAttrValue(saleAttr.getAttrValue());
-                AttrEntity attrEntity = attrDao.selectById(saleAttr.getAttrId());
-                entity.setAttrName(attrEntity.getAttrName());
-                entity.setAttrSort(0);
-                entity.setSkuId(skuId);
-                skuSaleAttrValueDao.insert(entity);
-            }
+              if(saleAttrs!=null&&saleAttrs.size()>0){
+                for (SaleAttrVo saleAttr : saleAttrs) {
+                    SkuSaleAttrValueEntity entity = new SkuSaleAttrValueEntity();
+                    entity.setAttrId(saleAttr.getAttrId());
+                    entity.setAttrValue(saleAttr.getAttrValue());
+                    AttrEntity attrEntity = attrDao.selectById(saleAttr.getAttrId());
+                    entity.setAttrName(attrEntity.getAttrName());
+                    entity.setAttrSort(0);
+                    entity.setSkuId(skuId);
+                    skuSaleAttrValueDao.insert(entity);
+                }
+             }
+
 
             //以上都是pms系统完成的工作
 

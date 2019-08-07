@@ -81,8 +81,8 @@ public class SpuInfoController {
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:spuinfo:save')")
      public Resp<Object> save (@RequestBody SpuAllSaveVo spuInfo){
-        spuInfoService.spuBigSaveAll(spuInfo);
-        return null;
+            spuInfoService.spuBigSaveAll(spuInfo);
+        return Resp.ok(null);
     }
 
     /**
